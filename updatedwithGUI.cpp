@@ -1,20 +1,17 @@
-#include <SFML/Graphics.hpp>
-#include <iostream>
-#include <string>
-#include <vector>
-#include <queue>
-#include <stack>
-#include <memory>
-#include <list>
-#include <algorithm>
-#include <limits>
-#include <sstream>   // For building inventory string
-#include <stdexcept> // For exception handling
+#include <SFML/Graphics.hpp> // Required for SFML graphics functionalities
+#include <iostream>          // Required for input/output operations (cout, cin, cerr)
+#include <string>            // Required for string manipulation
+#include <vector>            // Required for std::vector container
+#include <queue>             // Required for std::queue container
+#include <stack>             // Required for std::stack container
+#include <memory>            // Required for smart pointers (std::unique_ptr)
+#include <list>              // Required for std::list container
+#include <algorithm>         // Required for std::transform and std::sort (for sorting)
+#include <limits>            // Required for numeric_limits (though not explicitly used for limits in the final code)
+#include <sstream>           // Required for std::stringstream for string building
+#include <stdexcept>         // Required for standard exception types (e.g., out_of_range, runtime_error)
 
-using namespace std;
-
-// --- All your classes (Character, Player, Enemy, Treasure, Room, etc.) go here ---
-// --- No changes are needed in the classes from Character to Dungeon ---
+using namespace std; // Using the standard namespace to avoid prefixing std::
 
 /**
  * @brief Base abstract class for all characters in the game.
@@ -22,11 +19,11 @@ using namespace std;
  */
 class Character
 {
-protected:
+protected: // Protected members are accessible within the class and by derived classes.
     string name;
     int health;
 
-public:
+public: // Public members are accessible from outside the class.
     /**
      * @brief Constructor for the Character class.
      * @param n The name of the character.
@@ -36,12 +33,13 @@ public:
 
     /**
      * @brief Virtual destructor to ensure proper cleanup of derived classes.
+     * It's crucial for polymorphic classes to have a virtual destructor.
      */
-    virtual ~Character() = default;
+    virtual ~Character() = default; // Using default destructor as no custom cleanup is needed.
 
     /**
      * @brief Pure virtual function to display the status of the character.
-     * Must be implemented by derived classes.
+     * Must be implemented by derived classes, making Character an abstract class.
      */
     virtual void displayStatus() const = 0;
 
@@ -66,7 +64,7 @@ public:
     {
         health -= damage;
         if (health < 0)
-            health = 0;
+            health = 0; // Ensure health does not go negative.
     }
 };
 
@@ -77,10 +75,10 @@ public:
 class Player : public Character
 {
 private:
-    list<string> inventory;
-    int moves;
-    int coins;
-    int enemiesDefeated;
+    list<string> inventory; // Player's inventory, stored as a list of strings.
+    int moves;              // Number of moves remaining for the player.
+    int coins;              // Total coins collected by the player.
+    int enemiesDefeated;    // Count of enemies the player has defeated.
 
 public:
     /**
@@ -98,7 +96,7 @@ public:
     {
         health += amount;
         if (health > 100)
-            health = 100;
+            health = 100; // Ensure health does not exceed maximum.
     }
 
     /**
@@ -110,9 +108,9 @@ public:
     template <typename T>
     void addToInventory(const T &item)
     {
-        stringstream ss;
+        stringstream ss; // Use stringstream to convert any type T to a string.
         ss << item;
-        inventory.push_back(ss.str());
+        inventory.push_back(ss.str()); // Add the string representation of the item to the list.
     }
 
     /**
@@ -128,7 +126,7 @@ public:
     void useMove()
     {
         if (moves > 0)
-            moves--;
+            moves--; // Only decrement if moves are available.
     }
 
     /**
@@ -166,12 +164,14 @@ public:
      */
     void sortInventory()
     {
+        // Sorts the list using a lambda for case-insensitive comparison.
         inventory.sort([](const string &a, const string &b)
                        {
                            string lowerA, lowerB;
-                           transform(a.begin(), a.end(), back_inserter(lowerA), ::tolower); // Convert to lowercase
-                           transform(b.begin(), b.end(), back_inserter(lowerB), ::tolower); // Convert to lowercase
-                           return lowerA < lowerB;                                          // Case-insensitive comparison
+                           // Convert strings to lowercase for comparison.
+                           transform(a.begin(), a.end(), back_inserter(lowerA), ::tolower);
+                           transform(b.begin(), b.end(), back_inserter(lowerB), ::tolower);
+                           return lowerA < lowerB; // Lexicographical comparison of lowercase strings.
                        });
     }
 
@@ -201,9 +201,10 @@ ostream &operator<<(ostream &os, const Player &player)
     os << "Coins Collected: " << player.getCoins() << "\n";
     os << "Enemies Defeated: " << player.getEnemiesDefeated() << "\n";
     os << "Inventory (Sorted): ";
-    player.getInventory();
+    player.getInventory(); // This call doesn't modify the internal list, it returns a copy.
+                           // The inventory is assumed to be sorted by player.sortInventory() before this is called for display.
     for (const auto &item : player.getInventory())
-        os << item << " ";
+        os << item << " "; // Iterate and print each item.
     os << "\n--------------------\n";
     return os;
 }
@@ -215,7 +216,7 @@ ostream &operator<<(ostream &os, const Player &player)
 class Enemy : public Character
 {
 private:
-    string description;
+    string description; // Unique description for the enemy.
 
 public:
     /**
@@ -249,7 +250,7 @@ public:
 class Treasure
 {
 private:
-    string item1, item2, key;
+    string item1, item2, key; // Two items and a key composing the treasure.
 
 public:
     /**
@@ -286,10 +287,10 @@ public:
 class Room
 {
 private:
-    string name;
-    Enemy enemy;
-    Treasure treasure;
-    string challenge;
+    string name;       // Name of the room.
+    Enemy enemy;       // The enemy residing in this room.
+    Treasure treasure; // The treasure found in this room.
+    string challenge;  // A specific challenge for this room.
 
 public:
     /**
@@ -335,7 +336,7 @@ template <typename T>
 class GameAssetManager
 {
 private:
-    vector<unique_ptr<T>> assets; // Stores assets using smart pointers
+    vector<unique_ptr<T>> assets; // Stores assets using smart pointers (unique ownership).
 
 public:
     /**
@@ -345,7 +346,7 @@ public:
      */
     void addAsset(unique_ptr<T> asset)
     {
-        assets.push_back(move(asset)); // Move semantics to transfer ownership
+        assets.push_back(move(asset)); // Use std::move to transfer ownership of the unique_ptr.
     }
 
     /**
@@ -357,11 +358,12 @@ public:
      */
     const T *getAsset(size_t index) const
     {
-        if (index >= 0 && index < assets.size())
+        if (index < assets.size()) // Check if the index is within valid bounds.
         {
-            return assets[index].get(); // Get raw pointer from unique_ptr
+            return assets[index].get(); // Return the raw pointer managed by unique_ptr.
         }
-        throw out_of_range("Asset index out of bounds."); // Exception for invalid access
+        // Throw an exception for invalid access.
+        throw out_of_range("Asset index out of bounds.");
     }
 
     /**
@@ -380,19 +382,19 @@ public:
 class Dungeon
 {
 private:
-    GameAssetManager<Room> roomManager; // Manages rooms using the templated asset manager
-    queue<Enemy> enemyQueue;            // Queue of enemies (not directly used for gameplay logic, but for demonstration)
-    stack<const Room *> roomStack;      // Stack to keep track of visited rooms for backtracking
-    int currentRoomIndex;               // Index of the current room in the roomManager
+    GameAssetManager<Room> roomManager; // Manages rooms using the templated asset manager.
+    queue<Enemy> enemyQueue;            // A queue to store enemies (demonstrates queue usage).
+    stack<const Room *> roomStack;      // A stack to keep track of visited rooms for backtracking.
+    int currentRoomIndex;               // The index of the current room within the roomManager.
 
 public:
     /**
      * @brief Constructor for the Dungeon class.
      * Initializes the rooms and populates the enemy queue.
      */
-    Dungeon() : currentRoomIndex(0)
-    { // Initialize currentRoomIndex to 0 for the first room
-        // Add rooms to the room manager
+    Dungeon() : currentRoomIndex(0) // Initialize currentRoomIndex to 0 for the first room.
+    {
+        // Add predefined rooms to the room manager.
         roomManager.addAsset(make_unique<Room>("Base",
                                                Enemy("Shadow Stalker", "A stealthy, dark creature.", 15),
                                                Treasure("5 Coins", "Armour", "Key1"),
@@ -414,18 +416,17 @@ public:
                                                Treasure("5 Coins", "Health Booster Potion", "Key5"),
                                                "Defeat the boss"));
 
-        // Populate enemy queue using a lambda to process rooms
-        // This demonstrates iterating through assets and handling potential exceptions.
+        // Populate enemy queue by iterating through managed rooms.
         for (size_t i = 0; i < roomManager.getAssetCount(); ++i)
         {
             try
             {
-                const Room *room = roomManager.getAsset(i);
-                enemyQueue.push(room->getEnemy());
+                const Room *room = roomManager.getAsset(i); // Get room using the manager.
+                enemyQueue.push(room->getEnemy());          // Add the enemy to the queue.
             }
             catch (const out_of_range &e)
             {
-                // Catching exception if getAsset fails, though unlikely with a valid loop
+                // Catching exception if getAsset fails, though unlikely with a valid loop.
                 cerr << "Error loading enemy for room: " << e.what() << endl;
             }
         }
@@ -455,11 +456,11 @@ public:
     {
         try
         {
-            return roomManager.getAsset(currentRoomIndex);
+            return roomManager.getAsset(currentRoomIndex); // Attempt to get the current room.
         }
         catch (const out_of_range &e)
         {
-            // Log the error but return nullptr to indicate no current room
+            // Log the error but return nullptr to indicate no current room.
             cerr << "Error getting current room: " << e.what() << endl;
             return nullptr;
         }
@@ -467,20 +468,20 @@ public:
 
     /**
      * @brief Advances the player to the next room in the dungeon.
-     * Pushes the new room onto the room stack.
+     * Pushes the current room onto the room stack before advancing.
      * @return A constant pointer to the next Room object, or nullptr if there are no more rooms.
      */
     const Room *advanceToNextRoom()
     {
         if (currentRoomIndex < static_cast<int>(roomManager.getAssetCount()))
-        { // Allow advancing to currentRoomIndex if it matches size, then increment
-            // If currentRoomIndex is valid, push current room before advancing
+        {
+            // If currentRoomIndex is valid, push current room before advancing.
             if (currentRoomIndex >= 0 && currentRoomIndex < static_cast<int>(roomManager.getAssetCount()))
             {
                 try
                 {
                     const Room *current = roomManager.getAsset(currentRoomIndex);
-                    roomStack.push(current);
+                    roomStack.push(current); // Push current room onto stack for backtracking.
                 }
                 catch (const out_of_range &e)
                 {
@@ -489,25 +490,26 @@ public:
                 }
             }
 
-            // Increment currentRoomIndex to point to the next room
+            // Increment currentRoomIndex to point to the next room.
             currentRoomIndex++;
 
+            // Check bounds again after incrementing to ensure the next room exists.
             if (currentRoomIndex < static_cast<int>(roomManager.getAssetCount()))
-            { // Check bounds after increment
+            {
                 try
                 {
                     const Room *nextRoom = roomManager.getAsset(currentRoomIndex);
-                    return nextRoom;
+                    return nextRoom; // Return the next room.
                 }
                 catch (const out_of_range &e)
                 {
-                    // Should not happen if currentRoomIndex is valid relative to getAssetCount
+                    // Should not happen if currentRoomIndex is valid relative to getAssetCount.
                     cerr << "Error advancing to next room (unexpected): " << e.what() << endl;
                     return nullptr;
                 }
             }
         }
-        return nullptr; // No more rooms
+        return nullptr; // No more rooms to advance to.
     }
 
     /**
@@ -518,33 +520,32 @@ public:
     const Room *backtrack()
     {
         if (roomStack.size() > 1)
-        {                    // Need at least two rooms to backtrack
-            roomStack.pop(); // Remove current room
-            if (!roomStack.empty())
-            {                                           // Check if stack is not empty after popping
-                const Room *prevRoom = roomStack.top(); // Get the previous room
-                // Find the index of the previous room
-                // This loop is necessary to update currentRoomIndex to match the room on stack
+        {                               // Need at least two rooms in stack to backtrack (current + previous).
+            roomStack.pop();            // Remove current room from the stack.
+            if (!roomStack.empty())     // Check if stack is not empty after popping.
+            {
+                const Room *prevRoom = roomStack.top(); // Get the previous room from the top of the stack.
+                // Find the index of the previous room to update currentRoomIndex.
                 for (size_t i = 0; i < roomManager.getAssetCount(); ++i)
                 {
                     try
                     {
                         if (roomManager.getAsset(i) == prevRoom)
                         {
-                            currentRoomIndex = static_cast<int>(i);
-                            break;
+                            currentRoomIndex = static_cast<int>(i); // Update the current room index.
+                            break;                                   // Found the room, exit loop.
                         }
                     }
                     catch (const out_of_range &e)
                     {
-                        // Log error if getAsset fails during backtrack search
+                        // Log error if getAsset fails during backtrack search.
                         cerr << "Error during backtrack room search: " << e.what() << endl;
                     }
                 }
                 return prevRoom;
             }
         }
-        return nullptr; // Cannot backtrack further
+        return nullptr; // Cannot backtrack further (stack is empty or only has one room).
     }
 
     /**
@@ -554,101 +555,126 @@ public:
     void displayRanking(const Player &player) const
     {
         cout << "\n======== GAME OVER ========\n"
-             << player;
+             << player; // Uses the overloaded operator<< for Player.
     }
 };
 
-// Enum to manage different game states for the GUI
+// Enum to manage different game states for the GUI.
 enum class GameState
 {
-    NAME_INPUT,
-    INSTRUCTIONS,
-    PLAYING,
-    GAME_OVER
+    NAME_INPUT,   // State for player name entry.
+    INSTRUCTIONS, // State for displaying game instructions.
+    PLAYING,      // Main game loop state.
+    GAME_OVER     // State for displaying game over screen.
 };
 
 /**
  * @brief Manages the Graphical User Interface (GUI) for the Dungeon Escape game.
+ * Uses SFML for rendering and event handling.
  */
 class GUI
 {
 private:
-    sf::RenderWindow window;
-    sf::Font font;
-    bool fontLoaded;
+    sf::RenderWindow window; // The SFML window where everything is drawn.
+    sf::Font font;           // The font used for all text in the GUI.
+    bool fontLoaded;         // Flag to indicate if the font was loaded successfully.
 
-    // UI Elements
+    // UI Elements (SFML Text, Shapes)
     sf::Text titleText, instructionsText, rulesTitleText, rulesBodyText, startButtonLabel;
-    sf::Text statusText[7];
+    sf::Text statusText[7]; // Array of sf::Text for displaying player and room status.
     sf::RectangleShape buttons[4];
     sf::Text buttonLabels[4];
     sf::RectangleShape startButton;
     sf::RectangleShape nameInputField, statusPanel;
     sf::Text nameInputText, namePromptText;
 
-    // Colors
-    sf::Color bgColor = sf::Color(30, 30, 40);
-    sf::Color panelColor = sf::Color(45, 45, 55);
-    sf::Color buttonColor = sf::Color(60, 60, 75);
-    sf::Color buttonHoverColor = sf::Color(80, 80, 100);
-    sf::Color textColor = sf::Color(200, 200, 220);
-    sf::Color titleColor = sf::Color(255, 215, 0);
-    sf::Color healthGoodColor = sf::Color(100, 255, 100);
-    sf::Color healthWarningColor = sf::Color(255, 255, 100);
-    sf::Color healthCriticalColor = sf::Color(255, 100, 100);
-    sf::Color messageColor = sf::Color(240, 240, 240);
+    // Custom Colors for UI.
+    sf::Color bgColor = sf::Color(30, 30, 40);           // Background color.
+    sf::Color panelColor = sf::Color(45, 45, 55);        // Color for UI panels.
+    sf::Color buttonColor = sf::Color(60, 60, 75);       // Default button color.
+    sf::Color buttonHoverColor = sf::Color(80, 80, 100); // Button color on hover.
+    sf::Color textColor = sf::Color(200, 200, 220);      // Default text color.
+    sf::Color titleColor = sf::Color(255, 215, 0);       // Gold-like color for titles.
+    sf::Color healthGoodColor = sf::Color(100, 255, 100);    // Green for good health.
+    sf::Color healthWarningColor = sf::Color(255, 255, 100); // Yellow for warning health.
+    sf::Color healthCriticalColor = sf::Color(255, 100, 100); // Red for critical health.
+    sf::Color messageColor = sf::Color(240, 240, 240);       // Color for status messages.
 
-    string enteredName;
-    string statusMessage;
+    string enteredName;  // Stores the player's name entered via GUI.
+    string statusMessage; // Stores the current message displayed in game (e.g., action results).
 
 public:
+    /**
+     * @brief Constructor for the GUI class.
+     * Initializes the SFML window and attempts to load the font.
+     */
     GUI() : window(sf::VideoMode(800, 600), "Dungeon Escape", sf::Style::Close | sf::Style::Titlebar), fontLoaded(false), enteredName("")
     {
         try
         {
+            // Attempt to load a system font. Path might need adjustment based on OS.
             if (!font.loadFromFile("C:/Windows/Fonts/segoeui.ttf"))
             {
                 throw runtime_error("Could not load system font 'segoeui.ttf'.");
             }
-            fontLoaded = true;
+            fontLoaded = true; // Set flag if font loaded successfully.
         }
         catch (const runtime_error &e)
         {
-            cerr << "Error: " << e.what() << " Text will not display.\n";
+            cerr << "Error: " << e.what() << " Text will not display.\n"; // Log error if font fails.
         }
-        setupUI();
+        setupUI(); // Call helper to set up all UI elements' initial properties.
     }
 
+    /**
+     * @brief Checks if the SFML window is currently open.
+     * @return True if the window is open, false otherwise.
+     */
     bool isOpen() const { return window.isOpen(); }
+
+    /**
+     * @brief Closes the SFML window.
+     */
     void close() { window.close(); }
+
+    /**
+     * @brief Polls for an SFML event.
+     * @param event A reference to an sf::Event object to store the polled event.
+     * @return True if an event was available, false otherwise.
+     */
     bool pollEvent(sf::Event &event) { return window.pollEvent(event); }
+
+    /**
+     * @brief Gets the player name entered through the GUI.
+     * @return The string containing the player's entered name.
+     */
     string getPlayerName() const { return enteredName; }
 
     /**
      * @brief Handles a single SFML event and updates game state accordingly.
      * @param event The SFML event to process.
-     * @param gameState The current game state (will be modified).
-     * @param choice The player's action choice (will be set).
+     * @param gameState The current game state (will be modified based on input).
+     * @param choice The player's action choice (will be set if an action button is clicked).
      */
     void handleEvent(const sf::Event &event, GameState &gameState, int &choice)
     {
         if (event.type == sf::Event::Closed)
-            close();
+            close(); // Close window if the close button is clicked.
 
         switch (gameState)
         {
         case GameState::NAME_INPUT:
             if (event.type == sf::Event::TextEntered)
             {
-                if (event.text.unicode < 128)
+                if (event.text.unicode < 128) // Process only ASCII characters.
                 {
-                    if (event.text.unicode == 8 && !enteredName.empty()) // Backspace
+                    if (event.text.unicode == 8 && !enteredName.empty()) // Backspace key (ASCII 8).
                         enteredName.pop_back();
-                    else if (event.text.unicode == 13) // Enter
-                        gameState = GameState::INSTRUCTIONS;
+                    else if (event.text.unicode == 13) // Enter key (ASCII 13).
+                        gameState = GameState::INSTRUCTIONS; // Move to instructions screen.
                     else if (event.text.unicode != 8 && event.text.unicode != 13)
-                        enteredName += static_cast<char>(event.text.unicode);
-                    nameInputText.setString(enteredName);
+                        enteredName += static_cast<char>(event.text.unicode); // Append character to name.
+                    nameInputText.setString(enteredName); // Update the SFML text object for display.
                 }
             }
             break;
@@ -657,8 +683,8 @@ public:
             if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
             {
                 sf::Vector2f mousePos = window.mapPixelToCoords({event.mouseButton.x, event.mouseButton.y});
-                if (startButton.getGlobalBounds().contains(mousePos))
-                    gameState = GameState::PLAYING;
+                if (startButton.getGlobalBounds().contains(mousePos)) // Check if "Start Game" button was clicked.
+                    gameState = GameState::PLAYING; // Move to playing state.
             }
             break;
 
@@ -668,9 +694,9 @@ public:
                 sf::Vector2f mousePos = window.mapPixelToCoords({event.mouseButton.x, event.mouseButton.y});
                 for (int i = 0; i < 4; ++i)
                 {
-                    if (buttons[i].getGlobalBounds().contains(mousePos))
+                    if (buttons[i].getGlobalBounds().contains(mousePos)) // Check which action button was clicked.
                     {
-                        choice = i + 1;
+                        choice = i + 1; // Set choice (1 for Fight, 2 for Bypass, etc.).
                         break;
                     }
                 }
@@ -679,20 +705,24 @@ public:
 
         case GameState::GAME_OVER:
             if (event.type == sf::Event::KeyPressed || event.type == sf::Event::MouseButtonPressed)
-                close();
+                close(); // Any key press or mouse click closes the window on game over.
             break;
         }
     }
 
     /**
      * @brief Updates all visual elements (status, hover effects, etc.).
+     * @param gameState The current game state.
+     * @param player The player object whose stats need to be updated.
+     * @param room A pointer to the current room for displaying room info.
+     * @param message The current status message to display.
      */
     void update(GameState gameState, const Player &player, const Room *room, const string &message)
     {
         if (!fontLoaded)
-            return;
+            return; // Don't update if font failed to load.
 
-        // Update hover effects based on current mouse position
+        // Update hover effects for buttons based on current mouse position.
         sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
         if (gameState == GameState::INSTRUCTIONS)
         {
@@ -706,7 +736,7 @@ public:
             }
         }
 
-        // Update status text
+        // Update status text based on current player and room data.
         updateStatus(player, room, message);
     }
 
@@ -717,12 +747,12 @@ public:
      * @param gameOverMessage The message to display on the game over screen.
      * @param player The player object to display stats from on the game over screen.
      */
-    void draw(GameState gameState, const string &rules, const string &gameOverMessage, const Player &player) // Modified
+    void draw(GameState gameState, const string &rules, const string &gameOverMessage, const Player &player)
     {
-        window.clear(bgColor);
+        window.clear(bgColor); // Clear the window with the background color.
         if (!fontLoaded)
         {
-            // Fallback if font fails
+            // Fallback: display an error if font failed to load.
             sf::Text errorText("Font not loaded!", font, 24);
             errorText.setFillColor(sf::Color::Red);
             window.draw(errorText);
@@ -730,6 +760,7 @@ public:
             return;
         }
 
+        // Draw elements based on the current game state.
         switch (gameState)
         {
         case GameState::NAME_INPUT:
@@ -738,7 +769,7 @@ public:
             window.draw(nameInputText);
             break;
         case GameState::INSTRUCTIONS:
-            rulesBodyText.setString(rules);
+            rulesBodyText.setString(rules); // Set rules text.
             window.draw(rulesTitleText);
             window.draw(rulesBodyText);
             window.draw(startButton);
@@ -748,14 +779,14 @@ public:
             window.draw(titleText);
             window.draw(instructionsText);
             window.draw(statusPanel);
-            for (int i = 0; i < 7; ++i)
+            for (int i = 0; i < 7; ++i) // Draw all status lines.
                 window.draw(statusText[i]);
-            for (int i = 0; i < 4; ++i)
+            for (int i = 0; i < 4; ++i) // Draw all action buttons and their labels.
             {
                 window.draw(buttons[i]);
                 window.draw(buttonLabels[i]);
             }
-            if (!statusMessage.empty())
+            if (!statusMessage.empty()) // Draw current status message if not empty.
             {
                 sf::Text messageText(statusMessage, font, 20);
                 messageText.setFillColor(messageColor);
@@ -764,18 +795,38 @@ public:
             }
             break;
         case GameState::GAME_OVER:
-            drawGameOver(gameOverMessage, player); // Modified
+            drawGameOver(gameOverMessage, player); // Call helper to draw game over screen with player stats.
             break;
         }
-        window.display();
+        window.display(); // Display everything drawn to the window.
     }
 
-private:
+private: // Private helper methods for GUI.
+    /**
+     * @brief Sets up all the UI elements, texts, buttons, etc., with their initial properties and positions.
+     */
     void setupUI();
-    void updateStatus(const Player &player, const Room *room, const string &message);
-    void drawGameOver(const string &message, const Player &player); // Modified
 
-    // Helper to center text origin
+    /**
+     * @brief Updates the content of the status text elements based on current game data.
+     * @param player The current player object.
+     * @param room A pointer to the current room.
+     * @param message The message to display.
+     */
+    void updateStatus(const Player &player, const Room *room, const string &message);
+
+    /**
+     * @brief Draws the specific Game Over screen, including the game over message and detailed player stats.
+     * @param message The main game over message (e.g., "Game Over! You ran out of moves.").
+     * @param player The Player object whose stats are to be displayed.
+     */
+    void drawGameOver(const string &message, const Player &player);
+
+    /**
+     * @brief Helper function to center the origin of an sf::Text object.
+     * This simplifies positioning text by its center point.
+     * @param text The sf::Text object to center.
+     */
     void centerOrigin(sf::Text &text)
     {
         sf::FloatRect bounds = text.getLocalBounds();
@@ -784,14 +835,15 @@ private:
 };
 
 /**
- * @brief Sets up all the UI elements, texts, buttons, etc.
+ * @brief Implementation of setupUI for the GUI class.
+ * Initializes all UI elements' fonts, sizes, colors, and positions.
  */
 void GUI::setupUI()
 {
     if (!fontLoaded)
-        return;
+        return; // Do nothing if font wasn't loaded.
 
-    // Main Game Title & Instructions
+    // Main Game Title & Instructions text setup.
     titleText.setFont(font);
     titleText.setString("Dungeon Escape");
     titleText.setCharacterSize(60);
@@ -799,62 +851,70 @@ void GUI::setupUI()
     titleText.setStyle(sf::Text::Bold);
     centerOrigin(titleText);
     titleText.setPosition(window.getSize().x / 2.f, 60.f);
+
     instructionsText.setFont(font);
     instructionsText.setString("Choose an action:");
     instructionsText.setCharacterSize(28);
     instructionsText.setFillColor(textColor);
     instructionsText.setPosition(20.f, 120.f);
 
-    // Status Panel & Text
+    // Status Panel background setup.
     statusPanel.setSize({window.getSize().x - 40.f, 200.f});
     statusPanel.setFillColor(panelColor);
     statusPanel.setPosition(20.f, 180.f);
     statusPanel.setOutlineThickness(1.f);
     statusPanel.setOutlineColor({80, 80, 95});
+
+    // Setup for individual status text lines.
     for (int i = 0; i < 7; ++i)
     {
         statusText[i].setFont(font);
         statusText[i].setCharacterSize(20);
         statusText[i].setFillColor(textColor);
-        statusText[i].setPosition(40.f, 200.f + i * 25);
+        statusText[i].setPosition(40.f, 200.f + i * 25); // Position each line vertically.
     }
 
-    // Main Action Buttons
+    // Setup for main action buttons (Fight, Bypass, Backtrack, Quit).
     const sf::Vector2f buttonSize(180.f, 55.f);
     const string labels[] = {"Fight", "Bypass", "Backtrack", "Quit"};
     for (int i = 0; i < 4; ++i)
     {
         buttons[i].setSize(buttonSize);
-        buttons[i].setPosition(20.f + i * (buttonSize.x + 20.f), 440.f);
+        buttons[i].setPosition(20.f + i * (buttonSize.x + 20.f), 440.f); // Position buttons horizontally.
         buttons[i].setOutlineThickness(2.f);
         buttons[i].setOutlineColor({100, 100, 120});
+
         buttonLabels[i].setFont(font);
         buttonLabels[i].setString(labels[i]);
         buttonLabels[i].setCharacterSize(22);
         buttonLabels[i].setFillColor(textColor);
         centerOrigin(buttonLabels[i]);
+        // Position label in the center of its corresponding button.
         buttonLabels[i].setPosition(buttons[i].getPosition().x + buttonSize.x / 2.f, buttons[i].getPosition().y + buttonSize.y / 2.f);
     }
 
-    // Name Input Screen
+    // Name Input Screen elements setup.
     namePromptText.setFont(font);
     namePromptText.setString("Enter your name and press Enter:");
     namePromptText.setCharacterSize(30);
     namePromptText.setFillColor(textColor);
     centerOrigin(namePromptText);
     namePromptText.setPosition(window.getSize().x / 2.f, 220.f);
+
     nameInputField.setSize({400.f, 50.f});
     nameInputField.setFillColor(sf::Color::White);
     nameInputField.setOutlineColor({100, 100, 100});
     nameInputField.setOutlineThickness(2.f);
-    nameInputField.setOrigin(200.f, 25.f);
+    nameInputField.setOrigin(200.f, 25.f); // Set origin to center for easier positioning.
     nameInputField.setPosition(window.getSize().x / 2.f, 280.f);
+
     nameInputText.setFont(font);
     nameInputText.setCharacterSize(28);
     nameInputText.setFillColor(sf::Color::Black);
+    // Position text relative to the input field, slightly offset.
     nameInputText.setPosition(nameInputField.getPosition().x - 190, nameInputField.getPosition().y - 15);
 
-    // Instructions Screen
+    // Instructions Screen elements setup.
     rulesTitleText.setFont(font);
     rulesTitleText.setString("Game Instructions");
     rulesTitleText.setCharacterSize(50);
@@ -862,37 +922,44 @@ void GUI::setupUI()
     rulesTitleText.setStyle(sf::Text::Bold);
     centerOrigin(rulesTitleText);
     rulesTitleText.setPosition(window.getSize().x / 2.f, 80.f);
+
     rulesBodyText.setFont(font);
     rulesBodyText.setCharacterSize(24);
     rulesBodyText.setFillColor(textColor);
-    rulesBodyText.setPosition(100.f, 150.f);
-   // CORRECTED LINES
-startButton.setSize({200.f, 60.f});
-startButton.setOutlineThickness(2.f);
-startButton.setOutlineColor({100, 100, 120});
-// Manually set the origin for the RectangleShape
-startButton.setOrigin(startButton.getSize().x / 2.f, startButton.getSize().y / 2.f);
-startButton.setPosition(window.getSize().x / 2.f, 480.f);
+    rulesBodyText.setPosition(100.f, 150.f); // Rules text position.
+
+    // Start Button for instructions screen.
+    startButton.setSize({200.f, 60.f});
+    startButton.setOutlineThickness(2.f);
+    startButton.setOutlineColor({100, 100, 120});
+    startButton.setOrigin(startButton.getSize().x / 2.f, startButton.getSize().y / 2.f); // Center origin.
+    startButton.setPosition(window.getSize().x / 2.f, 480.f); // Position the button.
+
     startButtonLabel.setFont(font);
     startButtonLabel.setString("Start Game");
     startButtonLabel.setCharacterSize(28);
     startButtonLabel.setFillColor(textColor);
     centerOrigin(startButtonLabel);
-    startButtonLabel.setPosition(startButton.getPosition());
+    startButtonLabel.setPosition(startButton.getPosition()); // Position label in the center of the button.
 }
 
 /**
- * @brief Updates the status text elements.
+ * @brief Updates the status text elements displayed in the playing state.
+ * @param player The player object to get stats from.
+ * @param room A pointer to the current room to get room and enemy info.
+ * @param message The message string to display (e.g., action results).
  */
 void GUI::updateStatus(const Player &player, const Room *room, const string &message)
 {
-    statusText[0].setString("Room: " + (room ? room->getName() : "N/A"));
+    // Set text for each status line using player and room data.
+    statusText[0].setString("Room: " + (room ? room->getName() : "N/A")); // Display room name, or N/A if no room.
     statusText[1].setString("Health: " + to_string(player.getHealth()));
     statusText[2].setString("Moves Remaining: " + to_string(player.getMoves()));
     statusText[3].setString("Enemy: " + (room ? room->getEnemy().getName() : "N/A"));
     statusText[4].setString("Enemy Desc: " + (room ? room->getEnemy().getDescription() : "N/A"));
     statusText[5].setString("Coins: " + to_string(player.getCoins()));
 
+    // Build inventory string.
     stringstream ss;
     ss << "Inventory: ";
     if (player.getInventory().empty())
@@ -901,11 +968,16 @@ void GUI::updateStatus(const Player &player, const Room *room, const string &mes
     {
         string invStr;
         for (const auto &item : player.getInventory())
-            invStr += item + ", ";
-        ss << invStr.substr(0, invStr.length() - 2);
+            invStr += item + ", "; // Append each item with a comma and space.
+        // Remove trailing ", " if it exists to avoid an extra comma.
+        if (invStr.length() > 2)
+            ss << invStr.substr(0, invStr.length() - 2);
+        else
+            ss << invStr; // Handles cases where invStr might be empty or just " ".
     }
-    statusText[6].setString(ss.str());
+    statusText[6].setString(ss.str()); // Set the formatted inventory string.
 
+    // Change health text color based on player's health level.
     if (player.getHealth() > 50)
         statusText[1].setFillColor(healthGoodColor);
     else if (player.getHealth() > 20)
@@ -913,59 +985,67 @@ void GUI::updateStatus(const Player &player, const Room *room, const string &mes
     else
         statusText[1].setFillColor(healthCriticalColor);
 
-    statusMessage = message;
+    statusMessage = message; // Store the current message to be drawn.
 }
 
 /**
- * @brief Draws the specific Game Over screen, including player stats.
- * @param message The game over message.
+ * @brief Draws the specific Game Over screen, including the game over message and detailed player stats.
+ * @param message The main game over message.
  * @param player The Player object whose stats are to be displayed.
  */
-void GUI::drawGameOver(const string &message, const Player &player) // Modified
+void GUI::drawGameOver(const string &message, const Player &player)
 {
+    // Setup and draw the main "Game Over" message.
     sf::Text gameOverText(message, font, 40);
     gameOverText.setFillColor(titleColor);
     gameOverText.setStyle(sf::Text::Bold);
     centerOrigin(gameOverText);
-    gameOverText.setPosition(window.getSize().x / 2.0f, window.getSize().y / 2.0f - 150); // Adjusted Y to make space
+    // Position adjusted to make space for player stats below.
+    gameOverText.setPosition(window.getSize().x / 2.0f, window.getSize().y / 2.0f - 150);
 
     window.draw(gameOverText);
 
-    // Display Player Stats
-    float currentY = window.getSize().y / 2.0f - 80;
-    float lineHeight = 25.0f;
-    float startX = window.getSize().x / 2.0f - 150; // Aligns stats to the left
+    // Display Player Stats individually.
+    float currentY = window.getSize().y / 2.0f - 80; // Starting Y position for stats.
+    float lineHeight = 25.0f;                       // Vertical spacing between stat lines.
+    float startX = window.getSize().x / 2.0f - 150; // X position for stats (left-aligned).
 
+    // Player Name.
     sf::Text playerNameText("Name: " + player.getName(), font, 20);
     playerNameText.setFillColor(textColor);
     playerNameText.setPosition(startX, currentY);
     window.draw(playerNameText);
     currentY += lineHeight;
 
+    // Player Health.
     sf::Text playerHealthText("Health: " + to_string(player.getHealth()), font, 20);
     playerHealthText.setFillColor(textColor);
     playerHealthText.setPosition(startX, currentY);
     window.draw(playerHealthText);
     currentY += lineHeight;
 
+    // Player Moves Left.
     sf::Text playerMovesText("Moves Left: " + to_string(player.getMoves()), font, 20);
     playerMovesText.setFillColor(textColor);
     playerMovesText.setPosition(startX, currentY);
     window.draw(playerMovesText);
     currentY += lineHeight;
 
+    // Player Coins Collected.
     sf::Text playerCoinsText("Coins Collected: " + to_string(player.getCoins()), font, 20);
     playerCoinsText.setFillColor(textColor);
     playerCoinsText.setPosition(startX, currentY);
     window.draw(playerCoinsText);
     currentY += lineHeight;
 
+    // Player Enemies Defeated.
     sf::Text playerEnemiesText("Enemies Defeated: " + to_string(player.getEnemiesDefeated()), font, 20);
     playerEnemiesText.setFillColor(textColor);
     playerEnemiesText.setPosition(startX, currentY);
     window.draw(playerEnemiesText);
     currentY += lineHeight;
 
+    // Player Inventory (Sorted).
     stringstream inventorySs;
     inventorySs << "Inventory (Sorted): ";
     if (player.getInventory().empty())
@@ -973,133 +1053,140 @@ void GUI::drawGameOver(const string &message, const Player &player) // Modified
     else
     {
         string invStr;
-        for (const auto &item : player.getInventory())
+        for (const auto &item : player.getInventory()) // Iterates through (assumed sorted) inventory.
             invStr += item + ", ";
-        // Remove trailing ", " if exists
-        if (invStr.length() > 2) {
+        // Remove trailing ", " if it exists.
+        if (invStr.length() > 2)
+        {
             inventorySs << invStr.substr(0, invStr.length() - 2);
-        } else {
-             inventorySs << invStr; // Handle case where it might be " " or empty
+        }
+        else
+        {
+            inventorySs << invStr; // Handles cases where invStr might be empty or just " ".
         }
     }
     sf::Text playerInventoryText(inventorySs.str(), font, 20);
     playerInventoryText.setFillColor(textColor);
     playerInventoryText.setPosition(startX, currentY);
     window.draw(playerInventoryText);
-    currentY += lineHeight;
+    currentY += lineHeight; // Update Y for the next element.
 
 
-    // Adjust prompt text position
+    // Adjust and draw the "Click or press any key to exit" prompt.
     sf::Text promptText("Click or press any key to exit.", font, 20);
     promptText.setFillColor(textColor);
     centerOrigin(promptText);
-    promptText.setPosition(window.getSize().x / 2.0f, currentY + 50); // Move prompt further down
+    promptText.setPosition(window.getSize().x / 2.0f, currentY + 50); // Position below stats.
 
     window.draw(promptText);
 }
 
 /**
  * @brief The main game loop that integrates game logic with the SFML GUI.
+ * Manages game states, updates game elements, and orchestrates drawing.
+ * @param player The Player object for the current game session.
+ * @param dungeon The Dungeon object managing rooms and game rules.
+ * @param gui The GUI object responsible for rendering and input.
  */
 void gameLoopWithGUI(Player &player, Dungeon &dungeon, GUI &gui)
 {
-    GameState gameState = GameState::NAME_INPUT;
-    const Room *currentRoom = nullptr;
-    string message = "";
-    string gameOverMessage = "";
+    GameState gameState = GameState::NAME_INPUT; // Start in the name input state.
+    const Room *currentRoom = nullptr;           // Pointer to the current room.
+    string message = "";                         // Message displayed in the game.
+    string gameOverMessage = "";                 // Message displayed on game over screen.
 
-    while (gui.isOpen())
+    while (gui.isOpen()) // Loop as long as the GUI window is open.
     {
         // 1. EVENT HANDLING
-        int choice = -1;
+        int choice = -1; // Reset choice for each loop iteration.
         sf::Event event;
-        while (gui.pollEvent(event))
+        while (gui.pollEvent(event)) // Poll for all pending SFML events.
         {
-            gui.handleEvent(event, gameState, choice);
+            gui.handleEvent(event, gameState, choice); // Process the event.
         }
 
         // 2. GAME LOGIC UPDATES
         if (gameState == GameState::PLAYING)
         {
-            // First time entering PLAYING state, initialize the first room
+            // First time entering PLAYING state, initialize the first room.
             if (currentRoom == nullptr)
             {
-                currentRoom = dungeon.advanceToNextRoom();
+                currentRoom = dungeon.advanceToNextRoom(); // Move to the first room.
                 if (!currentRoom)
                 {
-                    gameOverMessage = "Error: No rooms available.";
+                    gameOverMessage = "Error: No rooms available."; // Error if no rooms.
                     gameState = GameState::GAME_OVER;
                 }
                 else
                 {
-                    message = "You have entered the " + currentRoom->getName() + " room.";
+                    message = "You have entered the " + currentRoom->getName() + " room."; // Initial room message.
                 }
             }
 
-            // Check for a player action from the event handler
+            // Check for a player action triggered by the event handler (choice > 0).
             if (choice > 0)
             {
-                player.useMove();
+                player.useMove(); // Decrement a move for any action.
                 switch (choice)
                 {
-                case 1: // Fight
+                case 1: // Fight action.
                 {
                     const Enemy &enemy = currentRoom->getEnemy();
-                    if (player.getHealth() >= enemy.getHealth())
+                    if (player.getHealth() >= enemy.getHealth()) // Player wins if health is higher.
                     {
-                        player.takeDamage(enemy.getHealth());
+                        player.takeDamage(enemy.getHealth()); // Player takes damage equal to enemy's health (cost of fighting).
                         player.addToInventory(currentRoom->getTreasure().getItem1());
                         player.addToInventory(currentRoom->getTreasure().getItem2());
                         player.addCoins(10);
                         player.incrementEnemiesDefeated();
                         message = "Victory! You defeated the " + enemy.getName() + ".";
-                        currentRoom = dungeon.advanceToNextRoom();
+                        currentRoom = dungeon.advanceToNextRoom(); // Move to next room.
                     }
                     else
                     {
-                        player.takeDamage(10);
+                        player.takeDamage(10);           // Player takes damage for fleeing.
                         message = "Too weak! You fled and took damage.";
                     }
                 }
                 break;
-                case 2: // Bypass
-                    player.takeDamage(5);
+                case 2: // Bypass action.
+                    player.takeDamage(5); // Minor damage for bypassing.
                     message = "You bypassed the enemy, taking minor damage.";
-                    currentRoom = dungeon.advanceToNextRoom();
+                    currentRoom = dungeon.advanceToNextRoom(); // Move to next room.
                     break;
-                case 3: // Backtrack
+                case 3: // Backtrack action.
                 {
-                    const Room *previousRoom = dungeon.backtrack();
+                    const Room *previousRoom = dungeon.backtrack(); // Attempt to backtrack.
                     if (previousRoom)
                     {
-                        currentRoom = previousRoom;
+                        currentRoom = previousRoom; // Update current room to previous.
                         message = "You backtracked to the " + currentRoom->getName() + " room.";
                     }
                     else
                     {
-                        message = "No room to backtrack to!";
+                        message = "No room to backtrack to!"; // Cannot backtrack message.
                     }
                 }
                 break;
-                case 4: // Quit
+                case 4: // Quit action.
                     gameOverMessage = "You have quit the dungeon.";
-                    gameState = GameState::GAME_OVER;
+                    gameState = GameState::GAME_OVER; // Change to game over state.
                     break;
                 }
-                // Check for win/lose conditions after an action
+                // Check for win/lose conditions after an action, if still in PLAYING state.
                 if (gameState == GameState::PLAYING)
                 {
-                    if (!currentRoom)
+                    if (!currentRoom) // No more rooms means player escaped.
                     {
                         gameOverMessage = "Congratulations! You escaped!";
                         gameState = GameState::GAME_OVER;
                     }
-                    else if (player.getHealth() < 20)
+                    else if (player.getHealth() < 20) // Health too low.
                     {
                         gameOverMessage = "Game Over! Your health is critical.";
                         gameState = GameState::GAME_OVER;
                     }
-                    else if (player.getMoves() <= 0)
+                    else if (player.getMoves() <= 0) // No more moves.
                     {
                         gameOverMessage = "Game Over! You ran out of moves.";
                         gameState = GameState::GAME_OVER;
@@ -1108,67 +1195,70 @@ void gameLoopWithGUI(Player &player, Dungeon &dungeon, GUI &gui)
             }
         }
 
+        // Sort player inventory when game ends for consistent display.
         if (gameState == GameState::GAME_OVER)
         {
             player.sortInventory();
         }
 
-        // 3. UPDATE & DRAW
-        gui.update(gameState, player, currentRoom, message);
-        gui.draw(gameState, dungeon.getRules(), gameOverMessage, player); // Modified
+        // 3. UPDATE & DRAW (GUI rendering phase)
+        gui.update(gameState, player, currentRoom, message);             // Update GUI elements based on game state.
+        gui.draw(gameState, dungeon.getRules(), gameOverMessage, player); // Draw everything to the window.
     }
 }
 
 /**
  * @brief Main function of the Dungeon Escape game.
+ * Sets up the game and runs the main GUI game loop.
  */
 int main()
 {
-    cout << "Welcome to Dungeon Escape (GUI Mode)!\n";
+    cout << "Welcome to Dungeon Escape (GUI Mode)!\n"; // Initial console message.
 
-    GUI gui;
+    GUI gui; // Create GUI object.
     if (!gui.isOpen())
     {
-        cerr << "Failed to initialize GUI. Exiting.\n";
+        cerr << "Failed to initialize GUI. Exiting.\n"; // Error if GUI window cannot be created.
         return 1;
     }
 
-    // Wait for name input to finish before creating player
+    // Loop to handle name input screen before starting the main game.
     while (gui.isOpen())
     {
-        GameState tempState = GameState::NAME_INPUT;
-        int dummyChoice;
+        GameState tempState = GameState::NAME_INPUT; // Temporary state for event handling.
+        int dummyChoice;                              // Dummy variable for choice, not used here.
         sf::Event event;
         while (gui.pollEvent(event))
         {
-            gui.handleEvent(event, tempState, dummyChoice);
+            gui.handleEvent(event, tempState, dummyChoice); // Handle events for name input.
             if (event.type == sf::Event::Closed)
-                gui.close();
+                gui.close(); // Allow closing the window during name input.
         }
 
         if (tempState != GameState::NAME_INPUT)
-            break; // Exit loop once name is entered
+            break; // Exit loop once name input is complete (state changes).
 
-        // Pass a temporary player object for initial draw as actual player isn't created yet
+        // Pass a temporary player object for initial draw as actual player isn't created yet.
+        // This is safe because GUI::update/draw for NAME_INPUT state doesn't use player data.
         gui.update(GameState::NAME_INPUT, Player(""), nullptr, "");
-        gui.draw(GameState::NAME_INPUT, "", "", Player("")); // Pass empty player for name input screen
+        gui.draw(GameState::NAME_INPUT, "", "", Player(""));
     }
 
-    string playerName = gui.getPlayerName();
+    string playerName = gui.getPlayerName(); // Get the name entered by the player.
     if (playerName.empty())
     {
-        playerName = "Adventurer";
+        playerName = "Adventurer"; // Default name if no name is entered.
     }
 
-    Player player(playerName);
-    Dungeon dungeon;
+    Player player(playerName); // Create the Player object with the determined name.
+    Dungeon dungeon;           // Create the Dungeon object.
 
-    // Start the main game loop
+    // Start the main game loop, passing the player, dungeon, and gui objects.
     gameLoopWithGUI(player, dungeon, gui);
 
-    // After GUI closes, display final stats to console (optional, as GUI now shows them)
+    // After GUI closes, display final stats to console (optional, as GUI now shows them).
     dungeon.displayRanking(player);
 
-    cout << "Thanks for playing Dungeon Escape!" << endl;
+    cout << "Thanks for playing Dungeon Escape!" << endl; // Final console message.
     return 0;
 }
