@@ -7,11 +7,11 @@
 #include <stack>
 #include <chrono>
 #include <thread>
-#include <memory>       // *** CHANGED: Added for smart pointers (std::unique_ptr)
-#include <algorithm>    // *** CHANGED: Added for std::sort
-#include <stdexcept>    // *** CHANGED: Added for exception handling
-#include <list>         // *** CHANGED: Using std::list as a linked list for inventory
-#include <limits>       // Required for numeric_limits in main.cpp
+#include <memory>      
+#include <algorithm>   
+#include <stdexcept>    
+#include <list>        
+#include <limits>       
 
 using namespace std;
 
@@ -144,7 +144,7 @@ public:
 // =================================================================================
 // === 3. ADVANCED C++: TEMPLATES ==================================================
 // =================================================================================
-// *** ADDED: A template function to print items from any standard container.
+// A template function to print items from any standard container.
 template<typename T>
 void printContainer(const T& container) {
     for (const auto& item : container) {
@@ -157,7 +157,7 @@ void printContainer(const T& container) {
 // =================================================================================
 // === Player Class Implementation =================================================
 // =================================================================================
-// *** CHANGED: Constructor now calls the base Character class constructor
+
 Player::Player(string n) : Character(n, 100), moves(10), coins(0), enemiesDefeated(0) {}
 
 void Player::heal(int amount) {
@@ -186,17 +186,17 @@ int Player::getCoins() const { return coins; }
 int Player::getEnemiesDefeated() const { return enemiesDefeated; }
 list<string> Player::getInventory() const { return inventory; }
 
-// *** ADDED: Implementation for sorting the player's inventory (Sorting Algorithm)
+// Implementation for sorting the player's inventory (Sorting Algorithm)
 void Player::sortInventory() {
     inventory.sort(); // Uses the list's built-in sort
 }
 
-// *** ADDED: Implementation of the overridden virtual function from Character
+//  Implementation of the overridden virtual function from Character
 void Player::displayStatus() const {
     cout << "Player: " << name << " | Health: " << health << endl;
 }
 
-// *** ADDED: Implementation of the overloaded << operator
+// Implementation of the overloaded << operator
 ostream& operator<<(ostream& os, const Player& player) {
     os << "\n--- Player Stats ---" << endl;
     os << "Name: " << player.getName() << endl;
@@ -215,7 +215,7 @@ ostream& operator<<(ostream& os, const Player& player) {
 // =================================================================================
 // === Enemy Class Implementation ==================================================
 // =================================================================================
-// *** CHANGED: Constructor now calls the base Character class constructor.
+// 
 Enemy::Enemy(string n, string desc, int hr) : Character(n, hr), description(desc) {}
 
 string Enemy::getDescription() const { return description; }
@@ -237,7 +237,7 @@ string Treasure::getKey() const { return key; }
 // =================================================================================
 Room::Room(string n, Enemy e, Treasure t, string c) : name(n), enemy(e), treasure(t), challenge(c) {}
 
-// *** ADDED: Getters for encapsulated members
+// getters for encapsulated members
 string Room::getName() const { return name; }
 const Enemy& Room::getEnemy() const { return enemy; }
 const Treasure& Room::getTreasure() const { return treasure; }
@@ -248,7 +248,7 @@ string Room::getChallenge() const { return challenge; }
 // === Dungeon Class Implementation ================================================
 // =================================================================================
 Dungeon::Dungeon() : currentRoomIndex(-1) { // Start before the first room
-    // *** CHANGED: Using std::make_unique for smart pointers (Advanced C++ Feature)
+    // Using std::make_unique for smart pointers (Advanced C++ Feature)
     rooms.push_back(make_unique<Room>("Base", Enemy("Shadow Stalker", "A stealthy, dark creature.", 15), Treasure("5 Coins", "Armour", "Key1"), "Collect 5 coins"));
     rooms.push_back(make_unique<Room>("Bronze", Enemy("Viper", "A venomous menace.", 25), Treasure("5 Coins", "Health Booster Potion", "Key2"), "Exit the room within 5 seconds"));
     rooms.push_back(make_unique<Room>("Platinum", Enemy("Crawler", "A fast, wall-climbing creature.", 35), Treasure("Health Booster Potion", "Armour", "Key3"), "Defeat the enemy without armour"));
@@ -271,7 +271,7 @@ void Dungeon::displayRules() const {
     cout << "Good luck!\n";
 }
 
-// *** CHANGED: Function to get the current room using the index.
+// Function to get the current room using the index
 const Room* Dungeon::getCurrentRoom() const {
     if (currentRoomIndex >= 0 && currentRoomIndex < rooms.size()) {
         return rooms[currentRoomIndex].get();
@@ -279,7 +279,6 @@ const Room* Dungeon::getCurrentRoom() const {
     return nullptr;
 }
 
-// *** CHANGED: Advances the index and returns the new room. Pushes to stack for backtracking.
 const Room* Dungeon::advanceToNextRoom() {
     if (currentRoomIndex < (int)rooms.size() - 1) {
         currentRoomIndex++;
@@ -290,7 +289,6 @@ const Room* Dungeon::advanceToNextRoom() {
     return nullptr; // No more rooms
 }
 
-// *** CHANGED: Pops from stack and finds the index of the previous room.
 const Room* Dungeon::backtrack() {
     if (roomStack.size() > 1) {
         roomStack.pop(); // Pop current room
@@ -307,7 +305,7 @@ const Room* Dungeon::backtrack() {
     return nullptr; // Can't backtrack
 }
 
-// *** CHANGED: displayRanking now uses the overloaded << operator for cleaner code.
+// displayRanking uses the overloaded << operator for cleaner code.
 void Dungeon::displayRanking(const Player& player) const {
     cout << "\n======== GAME OVER ========" << endl;
     cout << player; // Use the overloaded operator
@@ -316,7 +314,7 @@ void Dungeon::displayRanking(const Player& player) const {
 // =================================================================================
 // === 2. ALGORITHMS: RECURSION ====================================================
 // =================================================================================
-// *** ADDED: The main game logic is now a recursive function.
+// The main game logic is now a recursive function.
 void gameLoop(Player& player, Dungeon& dungeon) {
     // Base Cases for recursion: conditions that end the game.
     if (player.getHealth() < 20) {
@@ -355,7 +353,7 @@ void gameLoop(Player& player, Dungeon& dungeon) {
     // =================================================================================
     // === 3. ADVANCED C++: EXCEPTION HANDLING =========================================
     // =================================================================================
-    // *** ADDED: Simple input validation to handle non-numeric input.
+    // simple input validation to handle non-numeric input.
     if (cin.fail()) {
         cin.clear(); // Clear error flags
         cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Discard bad input
