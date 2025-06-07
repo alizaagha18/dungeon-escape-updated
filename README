@@ -1,0 +1,85 @@
+# Dungeon Escape (SFML GUI)
+
+## Introduction
+Dungeon Escape is a console-based dungeon crawler game enhanced with a modern Graphical User Interface (GUI) built using the SFML library. Players navigate through a series of challenging rooms, encountering enemies, collecting treasures, and making strategic choices to survive and escape the dungeon.
+
+The game features core RPG elements, object-oriented design, robust memory management with smart pointers, and a dynamic, interactive user experience.
+
+## Features
+
+* **Interactive GUI:** Powered by SFML, offering a visually engaging experience over a traditional console interface.
+* **Game States:** Manages different screens including Name Input, Instructions, Gameplay, and Game Over.
+* **Player Statistics:** Tracks and displays player name, health, moves, coins collected, enemies defeated, and inventory.
+* **Dungeon Navigation:** Advance through rooms or backtrack to previous ones using a stack-based system.
+* **Combat System:** Players can choose to fight or bypass enemies, with consequences for each action.
+* **Treasure Collection:** Discover and collect items and coins throughout the dungeon.
+* **Dynamic Inventory:** Player inventory can be sorted alphabetically.
+* **Object-Oriented Design (OOP):** Utilizes inheritance, polymorphism, and encapsulation for a modular and maintainable codebase.
+* **Modern C++ Features:**
+    * **Smart Pointers (`std::unique_ptr`):** For automatic and safe memory management of game assets.
+    * **STL Containers:** Effective use of `std::vector`, `std::list`, `std::queue`, and `std::stack` for data organization.
+    * **Templates:** Generic asset management (`GameAssetManager`) and flexible item addition (`Player::addToInventory`).
+    * **Exception Handling:** Robust error recovery for issues like font loading and invalid asset access.
+    * **Lambdas:** Used for custom sorting logic (e.g., case-insensitive inventory sort).
+
+## How to Play
+
+1.  **Start the Game:** Upon launching, you will be prompted to enter your name.
+2.  **Read Instructions:** After entering your name, the game rules will be displayed. Click "Start Game" to begin your adventure.
+3.  **Navigate the Dungeon:**
+    * You start with 100 health and 10 moves.
+    * Each room presents an `Enemy`, `Treasure`, and a `Challenge`.
+    * **Fight:** Engage the enemy. If your health is sufficient, you defeat the enemy, gain their treasure, coins, and advance. Otherwise, you take damage and flee.
+    * **Bypass:** Avoid the enemy, taking minor damage but moving to the next room directly.
+    * **Backtrack:** Return to the previously visited room. This uses one move.
+    * **Quit:** End the game immediately.
+4.  **Win Condition:** Escape all rooms in the dungeon.
+5.  **Loss Conditions:**
+    * Your health drops below 20.
+    * You run out of moves.
+
+## Setup and Installation
+
+### Prerequisites
+
+* A C++ compiler (e.g., g++, Clang, MSVC)
+* SFML library (version 2.5.1 or later recommended)
+
+### SFML Installation
+
+You need to install SFML on your system. Visit the official SFML website ([https://www.sfml-dev.org/download.php](https://www.sfml-dev.org/download.php)) for detailed installation instructions for your operating system.
+
+**Important Note for Windows Users:**
+The code expects a specific system font to be present. If you encounter issues with text display, ensure `C:/Windows/Fonts/segoeui.ttf` exists or update the font path in `GUI` constructor to a font available on your system.
+
+### Building the Game
+
+1.  **Clone the repository:**
+    ```bash
+    git clone [https://github.com/your-username/Dungeon-Escape.git](https://github.com/your-username/Dungeon-Escape.git)
+    cd Dungeon-Escape
+    ```
+2.  **Compile with g++ (Linux/macOS):**
+    Navigate to the directory containing `updated.cpp` (or your renamed source file). Replace `<path_to_sfml_include>` and `<path_to_sfml_lib>` with your actual SFML installation paths.
+
+    ```bash
+    g++ updated.cpp -o DungeonEscape -I<path_to_sfml_include> -L<path_to_sfml_lib> -lsfml-graphics -lsfml-window -lsfml-system
+    ```
+    * **Example (Linux, if SFML is installed system-wide):**
+        ```bash
+        g++ updated.cpp -o DungeonEscape -lsfml-graphics -lsfml-window -lsfml-system
+        ```
+    * **Example (macOS with Homebrew SFML):**
+        ```bash
+        g++ updated.cpp -o DungeonEscape -I/opt/homebrew/opt/sfml/include -L/opt/homebrew/opt/sfml/lib -lsfml-graphics -lsfml-window -lsfml-system
+        ```
+
+3.  **Compile with MSVC (Windows):**
+    If using Visual Studio, create a new C++ project, add `updated.cpp` to it, and configure the project properties to link with the SFML libraries. Refer to the SFML documentation for detailed Visual Studio setup.
+
+### Running the Game
+
+After successful compilation, execute the game:
+
+```bash
+./DungeonEscape
