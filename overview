@@ -1,0 +1,17 @@
+**Code Structure Overview**
+-Character: Abstract base class for all entities with health and a name (Player, Enemy inherit from it).
+-Player: Manages player-specific attributes like inventory, moves, coins, and enemies defeated.
+-Enemy: Defines attributes for enemies, including descriptions and health required to win.
+-Treasure: Represents items and keys found in rooms.
+-Room: Defines a single dungeon room with an enemy, treasure, and challenge.
+-GameAssetManager<T>: A templated class to manage game assets (e.g., Room objects) using std::unique_ptr for safe memory handling.
+-Dungeon: Manages the overall dungeon structure, room navigation, and game rules.
+-GUI: Handles all graphical rendering, user input, and game state display using SFML.
+-gameLoopWithGUI(): The main game loop function, orchestrating game logic updates and GUI rendering.
+**Future Enhancements** (Ideas for further development)
+-Add more diverse room challenges (riddles, puzzles).
+-Implement different item types with unique effects (potions, weapons, armor).
+-Expand enemy types with varying attack patterns or special abilities.
+-Implement a combat system with turns or player attack/defense stats.
+-Save/Load game functionality.
+-More advanced GUI elements and animations.
